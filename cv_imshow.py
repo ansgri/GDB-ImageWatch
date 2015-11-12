@@ -29,14 +29,14 @@ from PIL import Image
 import struct
 
 
-def chunker(seq, size):
+def _chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
-class cv_imshow(gdb.Command):
+class save_image(gdb.Command):
     """Diplays the content of an opencv image"""
 
     def __init__(self):
-        super(cv_imshow, self).__init__('cv_imshow',
+        super(save_image, self).__init__('save_image',
                                         gdb.COMMAND_SUPPORT,
                                         gdb.COMPLETE_FILENAME)
 
@@ -192,12 +192,12 @@ class cv_imshow(gdb.Command):
         if n_channel == 1:
             mode = 'L'
             fmt = '%d%s%dx' % (width, data_symbol, padding)
-            for line in chunker(memory_data, line_step):
+            for line in _chunker(memory_data, line_step):
                 image_data.extend(struct.unpack(fmt, line))
         elif n_channel == 3:
             mode = 'RGB'
             fmt = '%d%s%dx' % (width * 3, data_symbol, padding)
-            for line in chunker(memory_data, line_step):
+            for line in _chunker(memory_data, line_step):
                 image_data.extend(struct.unpack(fmt, line))
         else:
             gdb.write('Only 1 or 3 channels supported\n', gdb.STDERR)
@@ -234,4 +234,4 @@ class cv_imshow(gdb.Command):
         img.save(self._filename)
         print('Saved image to ' + self._filename)
 
-cv_imshow()
+save_image()

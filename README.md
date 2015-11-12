@@ -3,6 +3,8 @@
 This is a simple python extension script to visualize interactively OpenCV
 images while debugging with gdb.
 
+This is a modification that actually works on `gdb 7.7` on python3, though only implements non-interactive "imwrite" functionality.
+
 ## INSTALL
 
  You need to have gdb (version 7.2 or newer).
@@ -21,18 +23,15 @@ images while debugging with gdb.
 ## USAGE
 
  Usage is extremely simple, once you have sourced the file. If the variable you
- want to inspect (i.e., show) is a `cv::Mat` or an `IplImage` with name 'image', 
+ want to inspect (i.e., show) is a `cv::Mat` or an `IplImage` with name 'image',
  all you need to do is
 
 ```
- gdb> cv_imshow image
+ gdb> save_image image [path/to/image.png=/tmp/gdb.png]
 ```
 
  from within your gdb session.
 
- On some systems (Arch Linux with DWM), coordinate and pixel value are displayed
- automatically while moving the cursor. On others (Mac OS X) you may need to hold 
- the left mouse button while moving the cursor.
 
 ## DEMO
 
@@ -42,7 +41,7 @@ images while debugging with gdb.
  $ cd gdb-imshow
  $ mkdir Debug
  $ cd Debug
- $ cmake -DCMAKE_BUILD_TYPE=Debug .. 
+ $ cmake -DCMAKE_BUILD_TYPE=Debug ..
  $ make
  $ gdb ./main
  ```
