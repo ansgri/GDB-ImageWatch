@@ -26,7 +26,6 @@
 
 import gdb
 from PIL import Image
-import pylab as pl
 import struct
 
 
@@ -42,15 +41,22 @@ class cv_imshow(gdb.Command):
                                         gdb.COMPLETE_FILENAME)
 
     def invoke (self, arg, from_tty):
-        # Access the variable from gdb.
+        args = gdb.string_to_argv(arg)
+        img_var = args[0]
+        if len(args) > 1:
+            self._filename = args[1]
+        else:
+            self._filename = '/tmp/gdb.png'
+
         frame = gdb.selected_frame()
-        val = frame.read_var(arg)
+        val = frame.read_var(img_var)
         if str(val.type.strip_typedefs()) == 'IplImage *':
             img_info = self.get_iplimage_info(val)
         else:
             img_info = self.get_cvmat_info(val)
 
-        if img_info: self.show_image(*img_info)
+        if img_info:
+            self.show_image(*img_info)
 
     @staticmethod
     def get_cvmat_info(val):
@@ -148,8 +154,7 @@ class cv_imshow(gdb.Command):
         return (cols, rows, channels, line_step, data_address, data_symbol)
 
 
-    @staticmethod
-    def show_image(width, height, n_channel, line_step, data_address, data_symbol):
+    def show_image(self, width, height, n_channel, line_step, data_address, data_symbol):
         """ Copies the image data to a PIL image and shows it.
 
         Args:
@@ -225,32 +230,8 @@ class cv_imshow(gdb.Command):
 
         # Show image.
         img = Image.new(mode, (width, height))
-        img.putdata(image_data)
-        img = pl.asarray(img);
-
-        fig = pl.figure()
-        b = fig.add_subplot(111)
-        if n_channel == 1:
-            b.imshow(img, cmap = pl.cm.Greys_r, interpolation='nearest')
-        elif n_channel == 3:
-            b.imshow(img, interpolation='nearest')
-
-        def format_coord(x, y):
-            col = int(x+0.5)
-            row = int(y+0.5)
-            if col>=0 and col<width and row>=0 and row<height:
-                if n_channel == 1:
-                    z = img[row,col]
-                    return '(%d, %d), [%1.2f]'%(col, row, z)
-                elif n_channel == 3:
-                    z0 = img[row,col,0]
-                    z1 = img[row,col,1]
-                    z2 = img[row,col,2]
-                    return '(%d, %d), [%1.2f, %1.2f, %1.2f]'%(col, row, z0, z1, z2)
-            else:
-                return 'x=%d, y=%d'%(col, row)
-
-        b.format_coord = format_coord
-        pl.show()
+        img.putdata(list(image_data))
+        img.save(self._filename)
+        print('Saved image to ' + self._filename)
 
 cv_imshow()
