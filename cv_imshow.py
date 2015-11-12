@@ -31,7 +31,7 @@ import struct
 
 
 def chunker(seq, size):
-    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
 class cv_imshow(gdb.Command):
     """Diplays the content of an opencv image"""
@@ -90,7 +90,7 @@ class cv_imshow(gdb.Command):
         gdb.write(cv_type_name + ' with ' + str(channels) + ' channels, ' +
                   str(rows) + ' rows and ' +  str(cols) +' cols\n')
 
-        data_address = unicode(val['data']).encode('utf-8').split()[0]
+        data_address = str(val['data']).encode('utf-8').split()[0]
         data_address = int(data_address, 16)
 
         return (cols, rows, channels, line_step, data_address, data_symbol)
