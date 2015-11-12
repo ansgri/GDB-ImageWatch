@@ -50,8 +50,12 @@ class save_image(gdb.Command):
 
         frame = gdb.selected_frame()
         val = frame.read_var(img_var)
-        if str(val.type.strip_typedefs()) == 'IplImage *':
+        type_str = str(val.type.strip_typedefs())
+        print(type_str)
+        if type_str == 'IplImage *':
             img_info = self.get_iplimage_info(val)
+        elif type_str.endswith('MinImg *'):
+            img_info = self.get_minimg_info(val)
         else:
             img_info = self.get_cvmat_info(val)
 
@@ -100,6 +104,55 @@ class save_image(gdb.Command):
         data_address = int(data_address, 16)
 
         return (cols, rows, channels, line_step, data_address, data_symbol)
+
+    @staticmethod
+    def get_minimg_info(val):
+        FMT_UINT = 0
+        FMT_INT  = 1
+        FMT_REAL = 2
+
+        channels = val['channels']
+        depth = val['channelDepth']
+        fmt = val['format']
+
+        if fmt == FMT_UINT and depth == 1:
+            cv_type_name = 'TYP_UINT8'
+            data_symbol = 'B'
+        elif fmt == FMT_INT and depth == 1:
+            cv_type_name = 'TYP_INT8'
+            data_symbol = 'b'
+        elif fmt == FMT_UINT and depth == 2:
+            cv_type_name = 'TYP_UINT16'
+            data_symbol = 'H'
+        elif fmt == FMT_INT and depth == 2:
+            cv_type_name = 'TYP_INT16'
+            data_symbol = 'h'
+        elif fmt == FMT_INT and depth == 4:
+            cv_type_name = 'TYP_INT32'
+            data_symbol = 'i'
+        elif fmt == FMT_REAL and depth == 4:
+            cv_type_name = 'TYP_REAL32'
+            data_symbol = 'f'
+        elif fmt == FMT_REAL and depth == 8:
+            cv_type_name = 'TYP_REAL64'
+            data_symbol = 'd'
+        else:
+            gdb.write('Unsupported MinImg format\n', gdb.STDERR)
+            return
+
+        rows = val['height']
+        cols = val['width']
+
+        line_step = val['stride']
+
+        gdb.write(cv_type_name + ' with ' + str(channels) + ' channels, ' +
+                  str(rows) + ' rows and ' +  str(cols) +' cols\n')
+
+        data_address = str(val['pScan0']).encode('utf-8').split()[0]
+        data_address = int(data_address, 16)
+
+        return (cols, rows, channels, line_step, data_address, data_symbol)
+
 
     @staticmethod
     def get_iplimage_info(val):
