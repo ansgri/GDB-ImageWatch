@@ -22,15 +22,14 @@ This is a modification that actually works on `gdb 7.7` on python3, though only 
 
 ## USAGE
 
- Usage is extremely simple, once you have sourced the file. If the variable you
- want to inspect (i.e., show) is a `cv::Mat` or an `IplImage` or MinImg or mximg::PImage with name 'image',
- all you need to do is
-
+Usage is extremely simple, once you have sourced the file. If the variable you
+want to inspect (i.e., show) is a `cv::Mat` or an `IplImage` or `MinImg` or `mximg::PImage`
+all you need to do is
 ```
  gdb> save_image image [path/to/image.png=/tmp/gdb.png]
 ```
-
- from within your gdb session.
+where `image` is the name of your variable
+from within your gdb session.
 
 
 ## DEMO
