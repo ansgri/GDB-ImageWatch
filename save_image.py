@@ -54,7 +54,7 @@ class save_image(gdb.Command):
         print(type_str)
         if type_str == 'IplImage *':
             img_info = self.get_iplimage_info(val)
-        elif type_str.endswith('MinImg *'):
+        elif type_str.endswith('MinImg *') or type_str.endswith('MinImg'):
             img_info = self.get_minimg_info(val)
         elif type_str.endswith('shared_ptr<mximg::Image const>'):
             val = gdb.parse_and_eval('&{}._M_ptr.img'.format(img_var))
